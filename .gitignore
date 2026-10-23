@@ -1,0 +1,10 @@
+# Internal coordination notes — never published
+.private-docs/
+
+# Local scratch
+tmp/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

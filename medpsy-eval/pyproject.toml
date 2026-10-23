@@ -1,0 +1,72 @@
+[project]
+name = "medpsy-eval"
+version = "0.1.0"
+description = "Evaluation pipeline for the MedPsy model releases, built on Inspect"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+dependencies = [
+    "inspect_ai==0.3.280",
+    "openai>=1.99",
+    "datasets>=3.0",
+    "huggingface_hub>=0.30",
+    "numpy>=1.26",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+    "transformers>=4.50",
+]
+
+[project.optional-dependencies]
+serve = ["vllm==0.20.2", "torch==2.11.0", "torchvision==0.26.0", "torchaudio==2.11.0"]
+
+# The PyPI vllm wheel pulls torch built for CUDA 13; the cu129 builds also run on CUDA 12.x
+# drivers (minor-version compatibility).
+[[tool.uv.index]]
+name = "pytorch-cu129"
+url = "https://download.pytorch.org/whl/cu129"
+explicit = true
+
+[tool.uv.sources]
+vllm = { url = "https://github.com/vllm-project/vllm/releases/download/v0.20.2/vllm-0.20.2+cu129-cp38-abi3-manylinux_2_31_x86_64.whl" }
+torch = { index = "pytorch-cu129" }
+torchvision = { index = "pytorch-cu129" }
+torchaudio = { index = "pytorch-cu129" }
+
+[project.scripts]
+medpsy-eval = "medpsy_eval.cli:main"
+
+[project.entry-points.inspect_ai]
+medpsy_eval = "medpsy_eval._registry"
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/medpsy_eval"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# verbatim prompt literals from the MedPsy paper evaluation; keep them byte for byte
+extend-exclude = [
+    "src/medpsy_eval/benchmarks/afrimedqa/prompts.py",
+    "src/medpsy_eval/benchmarks/healthbench/prompts.py",
+    "src/medpsy_eval/benchmarks/medmcqa/prompts.py",
+    "src/medpsy_eval/benchmarks/medqa/prompts.py",
+    "src/medpsy_eval/benchmarks/medxpertqa/prompts.py",
+    "src/medpsy_eval/benchmarks/mmlu/prompts.py",
+    "src/medpsy_eval/benchmarks/mmlu_pro_health/prompts.py",
+    "src/medpsy_eval/benchmarks/pubmedqa/prompts.py",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# literal hashes and dataset revisions
+"tests/golden_values.py" = ["E501"]
+# verbatim prompt literals
+"tests/test_prompts.py" = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

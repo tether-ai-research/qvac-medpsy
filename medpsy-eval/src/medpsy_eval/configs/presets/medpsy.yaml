@@ -1,0 +1,41 @@
+# MedPsy evaluation: the closed-ended benchmarks and HealthBench.
+# Suite keys other than task / datasets / judge / report are arguments of the task factory.
+name: medpsy
+
+# Request settings for the evaluated model (sent with every generation).
+generation:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  max_tokens: 16384
+  extra_body:
+    min_p: 0.0
+    chat_template_kwargs:
+      enable_thinking: true
+
+suites:
+  closed_ended:
+    task: closed_ended_v1
+    datasets:
+      - medxpertqa
+      - AfriMedQA
+      - mmlu_pro_health
+      - MedQA_US
+      - medmcqa
+      - PubMedQA
+      - mmlu
+    epochs: 3
+    judge_temperature: 0.01
+    judge_max_tokens: 4096
+    judge:
+      model: Qwen/QwQ-32B
+      revision: 976055f8c83f394f35dbd3ab09a285a984907bd0
+
+  healthbench:
+    task: healthbench_v1
+    epochs: 1
+    judge_temperature: 0.5
+    judge_max_tokens: 2048
+    judge:
+      model: opencompass/CompassJudger-2-32B-Instruct
+      revision: 1e586e14ba945e073fb60d73e91ce798e323341c
